@@ -1,20 +1,7 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+############################
+# Load and Preprocess Data #
+############################
 
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-## Loading and preprocessing the data
-
-We first load the Tidyverse package, import our data, and tidy it up for use in the project.
-
-```{r, echo=TRUE}
 # Load Tidyverse
 library(tidyverse)
 
@@ -29,15 +16,11 @@ data$date <- as.Date(data$date, "%Y-%m-%d")
 
 # Convert daily interval variable to factor class
 data$interval <- as.factor(data$interval)
-```
 
-## What is mean total number of steps taken per day?
+#####################################################
+# What is mean total number of steps taken per day? #
+#####################################################
 
-The mean total number of steps taken per day is 9354.23. The median is 10395.
-
-To determine the mean total number of steps taken per day, we first group the data by date. Then we calcualte the total number of steps taken per day. Per the assignment, we created a histogram to view the grouped data before finding the exact mean and median.
-
-```{r, echo=TRUE}
 # Group data by date
 data2 <- group_by(data, date)
 
@@ -50,13 +33,12 @@ hist(data2$daily_steps, breaks=20)
 # Calculate mean and median of total number of steps taken per day
 mean(data2$daily_steps, na.rm=T)
 median(data2$daily_steps, na.rm=T)
-```
 
-## What is the average daily activity pattern?
 
-The 5-minute interval beginning at 8:35 has the highest number of steps.
+###############################################
+# What is the average daily activity pattern? #
+###############################################
 
-```{r, echo=TRUE}
 # Group data by daily interval
 data3 <- group_by(data, interval)
 
@@ -69,21 +51,19 @@ lines(data3$interval, data3$avg_steps)
 
 # Find 5-minute interval with max average number of daily steps
 filter(data3, avg_steps == max(data3$avg_steps))
-```
 
-## Imputing missing values
 
-The total number of missing values in the dataset is 2304.
+###########################
+# Imputing missing values #
+###########################
 
-The strategy for filling in missing values is to use the daily average of the interval.
-
-The mean number of steps taken per day is 10766.19. The median is 10766.19.
-
-These values are higher than the values calculated without imputing missing values.
-
-```{r, echo=TRUE}
 # Calculate total number of rows with NAs
 sum(is.na(data$steps))
+
+# Devise a strategy for filling in all of the missing values in the dataset
+# If interval is NA, then use daily average of the interval
+
+# Fill in missing data
 
 # Join datasets so interval average is observed alongside interval observation
 data4 <- left_join(data3, data)
@@ -107,13 +87,12 @@ hist(data4_grouped$daily_steps, breaks=20)
 # Calculate mean and median of total number of steps taken per day
 mean(data4_grouped$daily_steps)
 median(data4_grouped$daily_steps)
-```
 
-## Are there differences in activity patterns between weekdays and weekends?
 
-Activity levels appear to be higher on weekdays than on the weekend.
+#################################################################
+# Difference in activity patterns between weekdays and weekends #
+#################################################################
 
-```{r, echo=TRUE}
 # Create a new factor variable with two levels – “weekday” and “weekend”
 
 data5 <- mutate(data4, weekday = weekdays(date))
@@ -130,5 +109,6 @@ data5_grouped <- summarize(data5_grouped, daily_steps = sum(steps))
 
 # Make a panel plot comparing 5-minute interval averages by weekday vs. weekend
 
-ggplot(data5_grouped, aes(interval, daily_steps)) + geom_point() + facet_wrap(~weekday)
-```
+ggplot(data5_grouped, aes(interval, daily_steps)) +
+  geom_point() + 
+  facet_wrap(~weekday)
